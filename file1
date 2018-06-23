@@ -1,0 +1,173 @@
+//final code to take input from sensors and output it as data on a webpage?? might need to get mac address done and handle
+//the AP and STA code appropriately, also have to deal with the lua script at runtime. THIS ISNT THE FINAL ONE GUYS!!!
+//here is the code for the STA i.e being a station for the wifi without being the server for the other devices
+#include <ESP8266WiFi.h>
+#include <ESP8266WebServer.h>
+
+/*Put your SSID & Password*/
+const char* ssid = "Shreya";  // Enter SSID here
+const char* password = "123456789";  //Enter Password here
+
+ESP8266WebServer server(80);
+
+uint8_t LEDpin = D2;
+bool LEDstatus = LOW;
+
+void setup() {
+  Serial.begin(9600);
+  delay(100);
+  pinMode(LEDpin, OUTPUT);
+
+  Serial.println("Connecting to ");
+  Serial.println(ssid);
+
+  //connect to your local wi-fi network
+  WiFi.begin(ssid, password);
+
+  //check wi-fi is connected to wi-fi network
+  while (WiFi.status() != WL_CONNECTED) {
+  delay(1000);
+  Serial.print(".");
+  }
+  Serial.println("");
+  Serial.println("WiFi connected..!");
+  Serial.print("Got IP: ");  Serial.println(WiFi.localIP());
+
+  server.on("/", handle_OnConnect);
+  server.on("/ledon", handle_ledon);
+  server.on("/ledoff", handle_ledoff);
+  server.onNotFound(handle_NotFound);
+
+  server.begin();
+  Serial.println("HTTP server started");
+}
+void loop() {
+  server.handleClient();
+  if(LEDstatus)
+  digitalWrite(LEDpin, HIGH);
+  else
+  digitalWrite(LEDpin, LOW);
+}
+
+void handle_OnConnect() {
+  LEDstatus = LOW;
+  server.send(200, "text/html", SendHTML(false)); 
+}
+
+void handle_ledon() {
+  LEDstatus = HIGH;
+  server.send(200, "text/html", SendHTML(true)); 
+}
+
+void handle_ledoff() {
+  LEDstatus = LOW;
+  server.send(200, "text/html", SendHTML(false)); 
+}
+
+void handle_NotFound(){
+  server.send(404, "text/plain", "Not found");
+}
+
+String SendHTML(uint8_t led){
+  String ptr = "<!DOCTYPE html>\n";
+  ptr +="<html>\n";
+  ptr +="<head>\n";
+  ptr +="<title>LED Control</title>\n";
+  ptr +="</head>\n";
+  ptr +="<body>\n";
+  ptr +="<h1>LED</h1>\n";
+  ptr +="<p>Click to switch LED on and off.</p>\n";
+  ptr +="<form method=\"get\">\n";
+  if(led)
+  ptr +="<input type=\"button\" value=\"LED OFF\" onclick=\"window.location.href='/ledoff'\">\n";
+  else
+  ptr +="<input type=\"button\" value=\"LED ON\" onclick=\"window.location.href='/ledon'\">\n";
+  ptr +="</form>\n";
+  ptr +="</body>\n";
+  ptr +="</html>\n";
+  return ptr;
+}
+
+
+//CODE FOR BEING THE AP I.E BEING THE LOCAL SERVER FOR THE NETWORK, PROBABLY NEEDS TO GENERATE ITS OWN NETWORK
+//MAYBE THIS CODE SHOULD BE UP THERE
+
+#include <ESP8266WiFi.h>
+#include <ESP8266WebServer.h>
+
+/* Put your SSID & Password */
+const char* ssid = "NodeMCU";  // Enter SSID here
+const char* password = "12345678";  //Enter Password here
+
+/* Put IP Address details */
+IPAddress local_ip(192,168,2,1);
+IPAddress gateway(192,168,2,1);
+IPAddress subnet(255,255,255,0);
+
+ESP8266WebServer server(80);
+
+uint8_t LEDpin = D2;
+bool LEDstatus = LOW;
+
+void setup() {
+  Serial.begin(9600);
+  pinMode(LEDpin, OUTPUT);
+
+  WiFi.softAP(ssid, password);
+  WiFi.softAPConfig(local_ip, gateway, subnet);
+  delay(100);
+  
+  server.on("/", handle_OnConnect);
+  server.on("/ledon", handle_ledon);
+  server.on("/ledoff", handle_ledoff);
+  server.onNotFound(handle_NotFound);
+
+  server.begin();
+  Serial.println("HTTP server started");
+}
+void loop() {
+  server.handleClient();
+  if(LEDstatus)
+  digitalWrite(LEDpin, HIGH);
+  else
+  digitalWrite(LEDpin, LOW);
+}
+
+void handle_OnConnect() {
+  LEDstatus = LOW;
+  server.send(200, "text/html", SendHTML(false)); 
+}
+
+void handle_ledon() {
+  LEDstatus = HIGH;
+  server.send(200, "text/html", SendHTML(true)); 
+}
+
+void handle_ledoff() {
+  LEDstatus = LOW;
+  server.send(200, "text/html", SendHTML(false)); 
+}
+
+void handle_NotFound(){
+  server.send(404, "text/plain", "Not found");
+}
+
+String SendHTML(uint8_t led){
+  String ptr = "<!DOCTYPE html>\n";
+  ptr +="<html>\n";
+  ptr +="<head>\n";
+  ptr +="<title>LED Control</title>\n";
+  ptr +="</head>\n";
+  ptr +="<body>\n";
+  ptr +="<h1>LED</h1>\n";
+  ptr +="<p>Click to switch LED on and off.</p>\n";
+  ptr +="<form method=\"get\">\n";
+  if(led)
+  ptr +="<input type=\"button\" value=\"LED OFF\" onclick=\"window.location.href='/ledoff'\">\n";
+  else
+  ptr +="<input type=\"button\" value=\"LED ON\" onclick=\"window.location.href='/ledon'\">\n";
+  ptr +="</form>\n";
+  ptr +="</body>\n";
+  ptr +="</html>\n";
+  return ptr;
+}
