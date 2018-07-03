@@ -1,5 +1,4 @@
 //final code to take input from sensors and output it as data on a webpage?? might need to get mac address done and handle
-//the AP and STA code appropriately, also have to deal with the lua script at runtime. THIS ISNT THE FINAL ONE GUYS!!!
 //here is the code for the STA i.e being a station for the wifi without being the server for the other devices
 #include <ESP8266WiFi.h>
 #include <ESP8266WebServer.h>
