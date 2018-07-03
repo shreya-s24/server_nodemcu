@@ -1,7 +1,9 @@
 #include <Wire.h>
 #include <ESP8266WebServer.h>
+#include <FirebaseArduino.h>
 #include <ESP8266WiFi.h>
 #include <Adafruit_MLX90614.h>
+#define firebasehost "console.firebase.google.com/u/1/project/racingteam-smartlab/overview"
 Adafruit_MLX90614 mlx = Adafruit_MLX90614();
 const char* ssid = "Shreya";  // Enter SSID here
 const char* password = "123456789";  //Enter Password here
@@ -28,17 +30,23 @@ mlx.begin();
 
   server.begin();
   Serial.println("HTTP server started");
+  Firebase.begin(firebasehost);
 }
+int r=0;
 
 void loop() {
   Serial.print(mlx.readAmbientTempC());
   Serial.print(mlx.readObjectTempC());
+  String n=Firebase.pushInt("Logs", r++);
+  if (Firebase.failed()){
+  Serial.println("failed logs"); Serial.println(Firebase.error()); return;
   
-
+  }
+  
   
   // put your main code here, to run repeatedly:
 
-}
+}//CODE FOR THE HTML PAGE TOO
  String SendHTML(uint8_t led){
   String ptr = "<!DOCTYPE html>\n";
   ptr +="<html>\n";
